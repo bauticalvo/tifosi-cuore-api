@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { UploadController } from '../controllers/uploadController';
 
 const router = Router();
 
@@ -9,9 +10,6 @@ router.get('/:publicId', async (req, res) => {
 });
 
 // List media (si necesitas paginación, etc.)
-router.get('/', async (req, res) => {
-  // Implementar listado de media
-  res.json({ message: 'Media list endpoint' });
-});
+router.get('/',  UploadController.getAllMedia);
 
 export default router;

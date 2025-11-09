@@ -3,6 +3,25 @@ import { CloudinaryService } from '../services/cloudinary';
 import { Media } from '../models/Media';
 
 export class UploadController {
+
+  static async getAllMedia(req: Request, res: Response) {
+    try {
+      const media = await Media.find().sort({ name: 1 });
+
+      res.json({
+        success: true,
+        data: media
+      });
+
+    } catch (error) {
+      console.error('Get media error:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error fetching media',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
   static async uploadImage(req: Request, res: Response) {
     try {
       if (!req.file) {
