@@ -11,7 +11,7 @@ export interface IProduct extends Document {
   _id: Types.ObjectId;
   name: string;
   slug: string;
-  category: 'camiseta' | 'short' | 'buzo';
+  category: 'camiseta' | 'short' | 'buzo' | "conjunto";
   description?: string;
   price: number;
   discount?: number;
@@ -46,7 +46,7 @@ const productSchema = new Schema<IProduct>({
   category: { 
     type: String, 
     required: true,
-    enum: ['camiseta', 'short', 'buzo'] 
+    enum: ['camiseta', 'short', 'buzo', "conjunto"] 
   },
   description: { 
     type: String 
