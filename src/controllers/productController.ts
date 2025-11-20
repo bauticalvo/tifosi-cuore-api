@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Product, Media, Color, Team, League, Country } from '../models';
 import { CloudinaryService } from '../services/cloudinary';
+import mongoose from 'mongoose';
 
 export class ProductController {
   static async getAllProducts(req: Request, res: Response) {
@@ -130,6 +131,111 @@ export class ProductController {
       });
     }
   }
+
+  static async updateProduct(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+  
+      // Validar ID
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid product ID"
+        });
+      }
+  
+      // Verificar si existe
+      const existingProduct = await Product.findById(id);
+      if (!existingProduct) {
+        return res.status(404).json({
+          success: false,
+          message: "Product not found"
+        });
+      }
+  
+      const {
+        name,
+        slug,
+        category,
+        description,
+        price,
+        discount,
+        color,
+        images,
+        variants,
+        is_featured,
+        season,
+        team,
+        league,
+        country,
+        tags,
+        meta_title,
+        meta_description,
+      } = req.body;
+  
+      const updateData: any = {};
+  
+      // Campos simples
+      if (name !== undefined) updateData.name = name;
+      if (slug !== undefined) updateData.slug = slug;
+      if (category !== undefined) updateData.category = category;
+      if (description !== undefined) updateData.description = description;
+      if (price !== undefined) updateData.price = price;
+      if (discount !== undefined) updateData.discount = discount;
+      if (meta_title !== undefined) updateData.meta_title = meta_title;
+      if (meta_description !== undefined) updateData.meta_description = meta_description;
+  
+      // Arrays
+      if (color !== undefined) updateData.color = Array.isArray(color) ? color : [color];
+      if (images !== undefined) updateData.images = Array.isArray(images) ? images : [images];
+      if (tags !== undefined) updateData.tags = Array.isArray(tags) ? tags : [tags];
+  
+      // Variants
+      if (variants !== undefined) updateData.variants = variants;
+  
+      // Boolean
+      if (is_featured !== undefined) updateData.is_featured = is_featured;
+  
+      // Season
+      if (season !== undefined) {
+        updateData.season = {
+          from: season.from ?? existingProduct.season.from,
+          to: season.to ?? existingProduct.season.to
+        };
+      }
+  
+      // Relaciones
+      if (team !== undefined) updateData.team = team;
+      if (league !== undefined) updateData.league = league;
+      if (country !== undefined) updateData.country = country;
+  
+      // Actualizar producto
+      const updatedProduct = await Product.findByIdAndUpdate(id, updateData, {
+        new: true,
+        runValidators: true,
+      })
+        .populate("images")
+        .populate("color")
+        .populate("team")
+        .populate("league")
+        .populate("country");
+  
+      return res.json({
+        success: true,
+        message: "Product updated successfully",
+        data: updatedProduct,
+      });
+  
+    } catch (error) {
+      console.error("Update product error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error updating product",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+  
 
   static async createProductWithExistingImages(req: Request, res: Response) {
     try {
